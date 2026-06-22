@@ -134,21 +134,24 @@ export const stationListData: StationInfo[] = [
     name: '阳光花园南门站',
     address: '阳光花园小区南门',
     type: 'both',
-    isDefault: true
+    isDefaultBoard: true,
+    isDefaultAlight: false
   },
   {
     id: 'st002',
     name: '实验小学站',
     address: '实验小学正门东侧',
     type: 'both',
-    isDefault: true
+    isDefaultBoard: false,
+    isDefaultAlight: true
   },
   {
     id: 'st003',
     name: '中心广场站',
     address: '中心广场北侧公交站',
     type: 'board',
-    isDefault: false
+    isDefaultBoard: false,
+    isDefaultAlight: false
   }
 ];
 

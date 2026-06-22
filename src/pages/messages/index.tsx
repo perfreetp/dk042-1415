@@ -55,7 +55,7 @@ const getIconEmoji = (type: MessageType): string => {
 };
 
 const MessagesPage: React.FC = () => {
-  const { getFilteredMessages, todayRide } = useAppStore();
+  const messages = useAppStore((s) => s.messages);
   const [activeType, setActiveType] = useState<string>('all');
   const [activeStudent, setActiveStudent] = useState<string>('all');
   const [, forceUpdate] = useState(0);
@@ -66,8 +66,15 @@ const MessagesPage: React.FC = () => {
   });
 
   const filteredMessages = useMemo(() => {
-    return getFilteredMessages(activeType, activeStudent === 'all' ? undefined : activeStudent);
-  }, [activeType, activeStudent, getFilteredMessages]);
+    let result = [...messages];
+    if (activeType !== 'all') {
+      result = result.filter((m) => m.type === activeType);
+    }
+    if (activeStudent !== 'all') {
+      result = result.filter((m) => m.studentName === activeStudent);
+    }
+    return result;
+  }, [messages, activeType, activeStudent]);
 
   // 按日期分组
   const groupedMessages = useMemo(() => {

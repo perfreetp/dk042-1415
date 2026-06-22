@@ -57,7 +57,8 @@ export interface StationInfo {
   name: string;
   address: string;
   type: 'board' | 'alight' | 'both';
-  isDefault: boolean;
+  isDefaultBoard: boolean;
+  isDefaultAlight: boolean;
 }
 
 // 紧急联系人

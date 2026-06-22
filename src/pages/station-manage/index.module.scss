@@ -81,14 +81,36 @@
 .stationFooter {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding-top: $spacing-sm;
   border-top: 1rpx solid $color-divider;
 }
 
-.defaultBadge {
+.defaultBadges {
   display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.defaultBadgeItem {
+  display: inline-flex;
   align-items: center;
+  padding: 4rpx 16rpx;
+  background-color: $color-primary-bg;
+  border-radius: $radius-button;
+
+  &.badgeAlight {
+    background-color: $color-success-bg;
+  }
+
+  &.badgeAlight .defaultDot {
+    background-color: $color-success;
+  }
+
+  &.badgeAlight .defaultText {
+    color: $color-success;
+  }
 }
 
 .defaultDot {

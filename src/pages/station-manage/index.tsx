@@ -6,8 +6,18 @@ import { useAppStore } from '@/store';
 import type { StationInfo } from '@/types';
 import styles from './index.module.scss';
 
+const canBoardType = (type: StationInfo['type']) => type === 'board' || type === 'both';
+const canAlightType = (type: StationInfo['type']) => type === 'alight' || type === 'both';
+
 const StationManagePage: React.FC = () => {
-  const { stations, addStation, updateStation, deleteStation, setDefaultStation } = useAppStore();
+  const {
+    stations,
+    addStation,
+    updateStation,
+    deleteStation,
+    setDefaultBoardStation,
+    setDefaultAlightStation
+  } = useAppStore();
   const [showModal, setShowModal] = useState(false);
   const [editingStation, setEditingStation] = useState<StationInfo | null>(null);
   const [formData, setFormData] = useState({
@@ -56,7 +66,8 @@ const StationManagePage: React.FC = () => {
         name: formData.name,
         address: formData.address,
         type: formData.type,
-        isDefault: stations.length === 0
+        isDefaultBoard: false,
+        isDefaultAlight: false
       };
       addStation(newStation);
       Taro.showToast({ title: '添加成功', icon: 'success' });
@@ -64,16 +75,22 @@ const StationManagePage: React.FC = () => {
     setShowModal(false);
   };
 
-  const handleSetDefault = (id: string) => {
-    setDefaultStation(id);
-    Taro.showToast({ title: '设置成功', icon: 'success' });
-    console.log('[StationManage] 设置默认站点，ID:', id);
+  const handleSetDefaultBoard = (id: string) => {
+    setDefaultBoardStation(id);
+    Taro.showToast({ title: '已设为默认上车点', icon: 'success' });
+    console.log('[StationManage] 设置默认上车点，ID:', id);
+  };
+
+  const handleSetDefaultAlight = (id: string) => {
+    setDefaultAlightStation(id);
+    Taro.showToast({ title: '已设为默认下车点', icon: 'success' });
+    console.log('[StationManage] 设置默认下车点，ID:', id);
   };
 
   const handleDelete = (id: string) => {
     const station = stations.find((s) => s.id === id);
-    if (station?.isDefault) {
-      Taro.showToast({ title: '默认站点不能删除', icon: 'none' });
+    if (station?.isDefaultBoard || station?.isDefaultAlight) {
+      Taro.showToast({ title: '默认站点不能删除，请先取消默认', icon: 'none' });
       return;
     }
 
@@ -116,43 +133,61 @@ const StationManagePage: React.FC = () => {
   const boardStations = stations.filter((s) => s.type !== 'alight');
   const alightStations = stations.filter((s) => s.type !== 'board');
 
-  const renderStationCard = (station: StationInfo) => (
-    <View key={station.id} className={styles.stationCard}>
-      <View className={styles.stationHeader}>
-        <Text className={styles.stationName}>{station.name}</Text>
-        <View className={classnames(styles.typeTag, styles[getTypeTagClass(station.type)])}>
-          <Text>{getTypeTagText(station.type)}</Text>
+  const renderStationCard = (station: StationInfo) => {
+    const isBoard = canBoardType(station.type);
+    const isAlight = canAlightType(station.type);
+    return (
+      <View key={station.id} className={styles.stationCard}>
+        <View className={styles.stationHeader}>
+          <Text className={styles.stationName}>{station.name}</Text>
+          <View className={classnames(styles.typeTag, styles[getTypeTagClass(station.type)])}>
+            <Text>{getTypeTagText(station.type)}</Text>
+          </View>
         </View>
-      </View>
-      <Text className={styles.stationAddress}>{station.address}</Text>
-      <View className={styles.stationFooter}>
-        <View className={styles.defaultBadge}>
-          {station.isDefault && (
-            <>
+        <Text className={styles.stationAddress}>{station.address}</Text>
+        <View className={styles.defaultBadges}>
+          {station.isDefaultBoard && (
+            <View className={styles.defaultBadgeItem}>
               <View className={styles.defaultDot} />
-              <Text className={styles.defaultText}>默认站点</Text>
-            </>
-          )}
-        </View>
-        <View className={styles.actionBtns}>
-          {!station.isDefault && (
-            <View
-              className={classnames(styles.actionBtn, styles.btnPrimary)}
-              onClick={() => handleSetDefault(station.id)}
-            >
-              <Text>设为默认</Text>
+              <Text className={styles.defaultText}>默认上车点</Text>
             </View>
           )}
-          <View className={styles.actionBtn} onClick={() => openEditModal(station)}>
-            <Text>编辑</Text>
-          </View>
-          <View className={styles.actionBtn} onClick={() => handleDelete(station.id)}>
-            <Text>删除</Text>
+          {station.isDefaultAlight && (
+            <View className={classnames(styles.defaultBadgeItem, styles.badgeAlight)}>
+              <View className={styles.defaultDot} />
+              <Text className={styles.defaultText}>默认下车点</Text>
+            </View>
+          )}
+        </View>
+        <View className={styles.stationFooter}>
+          <View className={styles.actionBtns}>
+            {isBoard && !station.isDefaultBoard && (
+              <View
+                className={classnames(styles.actionBtn, styles.btnPrimary)}
+                onClick={() => handleSetDefaultBoard(station.id)}
+              >
+                <Text>设为默认上车点</Text>
+              </View>
+            )}
+            {isAlight && !station.isDefaultAlight && (
+              <View
+                className={classnames(styles.actionBtn, styles.btnPrimary)}
+                onClick={() => handleSetDefaultAlight(station.id)}
+              >
+                <Text>设为默认下车点</Text>
+              </View>
+            )}
+            <View className={styles.actionBtn} onClick={() => openEditModal(station)}>
+              <Text>编辑</Text>
+            </View>
+            <View className={styles.actionBtn} onClick={() => handleDelete(station.id)}>
+              <Text>删除</Text>
+            </View>
           </View>
         </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <View className={styles.pageContainer}>

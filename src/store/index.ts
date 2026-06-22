@@ -46,14 +46,15 @@ interface AppState {
   getExceptionById: (id: string) => ExceptionRecord | undefined;
 
   // ===== 请假相关 =====
-  addLeaveRecord: (record: Omit<LeaveRecord>) => boolean;
+  addLeaveRecord: (record: LeaveRecord) => boolean;
   hasLeaveOnDate: (date: string) => boolean;
 
   // ===== 站点相关 =====
   addStation: (station: StationInfo) => void;
   updateStation: (station: StationInfo) => void;
   deleteStation: (id: string) => void;
-  setDefaultStation: (id: string) => void;
+  setDefaultBoardStation: (id: string) => void;
+  setDefaultAlightStation: (id: string) => void;
   getDefaultBoardStation: () => StationInfo | undefined;
   getDefaultAlightStation: () => StationInfo | undefined;
 
@@ -66,16 +67,20 @@ interface AppState {
 
   // ===== 消息相关 =====
   addMessage: (msg: Omit<MessageRecord, 'id'>) => void;
-  getFilteredMessages: (filterType?: string, studentName?: string) => MessageRecord[];
 
   // ===== 今日乘车 =====
   updateTodayRideLeave: (isLeave: boolean, reason?: string) => void;
 }
 
+// 判断站点能否作为上车点
+const canBoard = (type: StationInfo['type']) => type === 'board' || type === 'both';
+// 判断站点能否作为下车点
+const canAlight = (type: StationInfo['type']) => type === 'alight' || type === 'both';
+
 // 生成初始消息
 const generateInitialMessages = (): MessageRecord[] => {
   const msgs: MessageRecord[] = [];
-  
+
   // 从异常生成消息
   exceptionListData.forEach((e) => {
     msgs.push({
@@ -125,7 +130,7 @@ const generateInitialMessages = (): MessageRecord[] => {
   }
 
   return msgs.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-});
+};
 
 export const useAppStore = create<AppState>((set, get) => ({
   exceptions: [...exceptionListData],
@@ -139,9 +144,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   updateExceptionStatus: (id, status) => {
     console.log('[Store] 更新异常状态', id, status);
     set((state) => ({
-      exceptions: state.exceptions.map((e) =>
-        e.id === id ? { ...e, status } : e
-      )
+      exceptions: state.exceptions.map((e) => (e.id === id ? { ...e, status } : e))
     }));
   },
 
@@ -152,8 +155,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   // ===== 请假相关 =====
   addLeaveRecord: (record) => {
     const state = get();
+    // 去重：同一天只允许一条请假记录
     if (state.leaveRecords.some((r) => r.date === record.date)) {
-      console.log('[Store] 该日期已有请假记录');
+      console.log('[Store] 该日期已有请假记录，拒绝重复新增');
       return false;
     }
     console.log('[Store] 新增请假记录', record);
@@ -161,17 +165,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       leaveRecords: [record, ...s.leaveRecords]
     }));
 
-    // 如果请假日期是今天，更新今日乘车
-    const today = new Date().toISOString().split('T')[0];
-    if (record.date === today) {
+    // 如果请假日期与今日乘车页日期一致，立即更新为已请假
+    if (record.date === get().todayRide.date) {
       get().updateTodayRideLeave(true, record.reason);
     }
 
-    // 添加消息
+    // 添加消息记录
     get().addMessage({
       type: 'leave_request',
-      title: '请假申请',
-      description: record.reason,
+      title: '请假申请已提交',
+      description: `${record.date} ${record.reason}`,
       time: record.createTime,
       studentName: get().todayRide.student.name,
       relatedId: record.id
@@ -206,22 +209,34 @@ export const useAppStore = create<AppState>((set, get) => ({
     }));
   },
 
-  setDefaultStation: (id) => {
-    console.log('[Store] 设置默认站点', id);
+  // 设置默认上车点：只影响 isDefaultBoard，不动下车点
+  setDefaultBoardStation: (id) => {
+    console.log('[Store] 设置默认上车点', id);
     set((s) => ({
       stations: s.stations.map((st) => ({
         ...st,
-        isDefault: st.id === id
+        isDefaultBoard: canBoard(st.type) ? st.id === id : st.isDefaultBoard
+      }))
+    }));
+  },
+
+  // 设置默认下车点：只影响 isDefaultAlight，不动上车点
+  setDefaultAlightStation: (id) => {
+    console.log('[Store] 设置默认下车点', id);
+    set((s) => ({
+      stations: s.stations.map((st) => ({
+        ...st,
+        isDefaultAlight: canAlight(st.type) ? st.id === id : st.isDefaultAlight
       }))
     }));
   },
 
   getDefaultBoardStation: () => {
-    return get().stations.find((s) => s.type !== 'alight' && s.isDefault);
+    return get().stations.find((s) => canBoard(s.type) && s.isDefaultBoard);
   },
 
   getDefaultAlightStation: () => {
-    return get().stations.find((s) => s.type !== 'board' && s.isDefault);
+    return get().stations.find((s) => canAlight(s.type) && s.isDefaultAlight);
   },
 
   // ===== 联系人相关 =====
@@ -235,7 +250,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   updateContact: (contact) => {
     console.log('[Store] 更新联系人', contact);
     set((s) => ({
-      contacts: s.contacts.map((c) => (c.id === contact.id ? contact : c)
+      contacts: s.contacts.map((c) => (c.id === contact.id ? contact : c))
     }));
   },
 
@@ -267,17 +282,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((s) => ({
       messages: [newMsg, ...s.messages]
     }));
-  },
-
-  getFilteredMessages: (filterType, studentName) => {
-    let result = [...get().messages];
-    if (filterType && filterType !== 'all') {
-      result = result.filter((m) => m.type === filterType);
-    }
-    if (studentName) {
-      result = result.filter((m) => m.studentName === studentName);
-    }
-    return result;
   },
 
   // ===== 今日乘车 =====

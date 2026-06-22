@@ -19,11 +19,12 @@ const LeaveRequestPage: React.FC = () => {
   const [reasonText, setReasonText] = useState<string>('');
 
   const handleDateChange = () => {
-    const today = new Date();
+    // 以今日乘车页日期为起点生成可选日期，保证“申请今日请假”能联动
+    const baseDate = new Date(todayRide.date);
     const dates = [];
     for (let i = 0; i < 7; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() + i);
+      const d = new Date(baseDate);
+      d.setDate(baseDate.getDate() + i);
       dates.push(
         `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
       );
