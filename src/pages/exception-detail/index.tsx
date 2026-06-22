@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text } from '@tarojs/components';
-import Taro, { useRouter } from '@tarojs/taro';
+import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import StatusTag from '@/components/StatusTag';
-import { exceptionListData } from '@/data/mock';
+import { useAppStore } from '@/store';
 import type { ExceptionRecord } from '@/types';
 import styles from './index.module.scss';
 
@@ -23,26 +23,44 @@ const getExceptionIcon = (type: ExceptionRecord['type']) => {
 
 const ExceptionDetailPage: React.FC = () => {
   const router = useRouter();
+  const { getExceptionById, updateExceptionStatus, addMessage, todayRide } = useAppStore();
   const [record, setRecord] = useState<ExceptionRecord | null>(null);
   const [status, setStatus] = useState<ExceptionRecord['status']>('pending');
 
-  useEffect(() => {
+  const loadData = () => {
     const id = router.params.id;
-    const found = exceptionListData.find((item) => item.id === id);
+    const found = getExceptionById(id);
     if (found) {
       setRecord(found);
       setStatus(found.status);
     }
     console.log('[ExceptionDetail] 加载异常详情，ID:', id);
+  };
+
+  useEffect(() => {
+    loadData();
   }, [router.params.id]);
+
+  useDidShow(() => {
+    loadData();
+  });
 
   const handleAcknowledge = () => {
     Taro.showModal({
       title: '确认知晓',
       content: '确认已知晓此异常情况？',
       success: (res) => {
-        if (res.confirm) {
+        if (res.confirm && record) {
+          updateExceptionStatus(record.id, 'acknowledged');
           setStatus('acknowledged');
+          addMessage({
+            type: 'exception',
+            title: `已确认：${record.title}`,
+            description: '家长已确认知晓',
+            time: new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-'),
+            studentName: todayRide.student.name,
+            relatedId: record.id
+          });
           Taro.showToast({ title: '已确认', icon: 'success' });
           console.log('[ExceptionDetail] 家长确认知晓异常');
         }
@@ -57,8 +75,17 @@ const ExceptionDetailPage: React.FC = () => {
       showCancel: true,
       confirmText: '拨打电话',
       success: (res) => {
-        if (res.confirm) {
+        if (res.confirm && record) {
+          updateExceptionStatus(record.id, 'questioned');
           setStatus('questioned');
+          addMessage({
+            type: 'exception',
+            title: `有疑问：${record.title}`,
+            description: '家长对此有疑问，将联系学校',
+            time: new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-'),
+            studentName: todayRide.student.name,
+            relatedId: record.id
+          });
           console.log('[ExceptionDetail] 家长标记有疑问');
         }
       }

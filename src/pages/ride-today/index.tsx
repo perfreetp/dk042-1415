@@ -1,24 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import RideTimeline from '@/components/RideTimeline';
-import { todayRideData } from '@/data/mock';
+import { useAppStore } from '@/store';
 import type { TodayRideInfo } from '@/types';
 import styles from './index.module.scss';
 
 const RideTodayPage: React.FC = () => {
-  const [rideData, setRideData] = useState<TodayRideInfo | null>(null);
+  const { todayRide } = useAppStore();
+  const [, forceUpdate] = useState(0);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = () => {
-    console.log('[RideToday] 加载今日乘车数据');
-    setTimeout(() => {
-      setRideData(todayRideData);
-    }, 300);
-  };
+  useDidShow(() => {
+    console.log('[RideToday] 页面展示，刷新数据');
+    forceUpdate((v) => v + 1);
+  });
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -30,13 +25,13 @@ const RideTodayPage: React.FC = () => {
   };
 
   const getOverallStatus = () => {
-    if (!rideData) return { text: '加载中...', type: 'pending' };
-    if (rideData.isLeaveRequested) return { text: '今日请假', type: 'leave' };
+    if (!todayRide) return { text: '加载中...', type: 'pending' };
+    if (todayRide.isLeaveRequested) return { text: '今日请假', type: 'leave' };
 
     const allDone =
-      rideData.afternoonNodes.length > 0 &&
-      rideData.afternoonNodes.every((node) => node.status === 'done');
-    const morningDone = rideData.morningNodes.every((node) => node.status === 'done');
+      todayRide.afternoonNodes.length > 0 &&
+      todayRide.afternoonNodes.every((node) => node.status === 'done');
+    const morningDone = todayRide.morningNodes.every((node) => node.status === 'done');
 
     if (allDone) return { text: '已安全到家', type: 'done' };
     if (morningDone) return { text: '在校中', type: 'school' };
@@ -45,7 +40,7 @@ const RideTodayPage: React.FC = () => {
 
   const status = getOverallStatus();
 
-  if (!rideData) {
+  if (!todayRide) {
     return (
       <View className={styles.pageContainer}>
         <View className={styles.emptyTip}>加载中...</View>
@@ -59,31 +54,32 @@ const RideTodayPage: React.FC = () => {
       scrollY
       refresherEnabled
       onRefresherRefresh={() => {
-        loadData();
+        console.log('[RideToday] 下拉刷新');
+        forceUpdate((v) => v + 1);
         setTimeout(() => {
           Taro.stopPullDownRefresh();
-        }, 1000);
+        }, 800);
       }}
     >
       <View className={styles.studentCard}>
         <View className={styles.studentInfo}>
           <Image
             className={styles.studentAvatar}
-            src={rideData.student.avatar}
+            src={todayRide.student.avatar}
             mode="aspectFill"
           />
           <View className={styles.studentDetail}>
-            <Text className={styles.studentName}>{rideData.student.name}</Text>
+            <Text className={styles.studentName}>{todayRide.student.name}</Text>
             <Text className={styles.studentClass}>
-              {rideData.student.grade} {rideData.student.className}
+              {todayRide.student.grade} {todayRide.student.className}
             </Text>
             <Text className={styles.studentNo}>
-              学号：{rideData.student.studentNo}
+              学号：{todayRide.student.studentNo}
             </Text>
           </View>
         </View>
         <View className={styles.dateRow}>
-          <Text className={styles.dateText}>{formatDate(rideData.date)}</Text>
+          <Text className={styles.dateText}>{formatDate(todayRide.date)}</Text>
           <View className={styles.statusBadge}>
             <View
               className={styles.statusDot}
@@ -101,21 +97,21 @@ const RideTodayPage: React.FC = () => {
         </View>
       </View>
 
-      {rideData.isLeaveRequested ? (
+      {todayRide.isLeaveRequested ? (
         <View className={styles.leaveBanner}>
           <Text className={styles.leaveIcon}>📝</Text>
           <View className={styles.leaveContent}>
             <Text className={styles.leaveTitle}>今日已请假</Text>
-            <Text className={styles.leaveReason}>{rideData.leaveReason || '家长已申请请假'}</Text>
+            <Text className={styles.leaveReason}>{todayRide.leaveReason || '家长已申请请假'}</Text>
           </View>
         </View>
       ) : (
         <>
           <View className={styles.timelineSection}>
-            <RideTimeline title="上午行程" nodes={rideData.morningNodes} />
+            <RideTimeline title="上午行程" nodes={todayRide.morningNodes} />
           </View>
           <View className={styles.timelineSection}>
-            <RideTimeline title="下午行程" nodes={rideData.afternoonNodes} />
+            <RideTimeline title="下午行程" nodes={todayRide.afternoonNodes} />
           </View>
         </>
       )}

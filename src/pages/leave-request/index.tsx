@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Textarea } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
+import { useAppStore } from '@/store';
 import styles from './index.module.scss';
 
 const reasonOptions = [
@@ -12,16 +13,13 @@ const reasonOptions = [
 ];
 
 const LeaveRequestPage: React.FC = () => {
+  const { addLeaveRecord, hasLeaveOnDate, todayRide } = useAppStore();
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedReason, setSelectedReason] = useState<string>('');
   const [reasonText, setReasonText] = useState<string>('');
 
   const handleDateChange = () => {
     const today = new Date();
-    const defaultDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-    // 使用 Taro 的日期选择器
-    // 这里我们用简单的方式模拟
     const dates = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(today);
@@ -34,7 +32,16 @@ const LeaveRequestPage: React.FC = () => {
     Taro.showActionSheet({
       itemList: dates,
       success: (res) => {
-        setSelectedDate(dates[res.tapIndex]);
+        const chosenDate = dates[res.tapIndex];
+        if (hasLeaveOnDate(chosenDate)) {
+          Taro.showModal({
+            title: '该日期已请假',
+            content: `${chosenDate} 已经有请假记录了，不能重复请假。`,
+            showCancel: false
+          });
+          return;
+        }
+        setSelectedDate(chosenDate);
       }
     });
   };
@@ -58,20 +65,44 @@ const LeaveRequestPage: React.FC = () => {
       return;
     }
 
-    console.log('[LeaveRequest] 提交请假申请', {
-      date: selectedDate,
-      reason: reasonText
-    });
+    if (hasLeaveOnDate(selectedDate)) {
+      Taro.showModal({
+        title: '提交失败',
+        content: `${selectedDate} 已经有请假记录了，不能重复请假。`,
+        showCancel: false
+      });
+      return;
+    }
 
     Taro.showModal({
       title: '提交确认',
       content: `确认请假日期：${selectedDate}\n请假原因：${reasonText}`,
       success: (res) => {
         if (res.confirm) {
-          Taro.showToast({ title: '提交成功', icon: 'success' });
-          setTimeout(() => {
-            Taro.navigateBack();
-          }, 1500);
+          const now = new Date();
+          const createTime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+          
+          const result = addLeaveRecord({
+            id: `leave-${Date.now()}`,
+            date: selectedDate,
+            reason: reasonText,
+            status: 'approved',
+            createTime
+          });
+
+          if (result) {
+            Taro.showToast({ title: '提交成功', icon: 'success' });
+            console.log('[LeaveRequest] 请假提交成功');
+            setTimeout(() => {
+              Taro.navigateBack();
+            }, 1500);
+          } else {
+            Taro.showModal({
+              title: '提交失败',
+              content: '该日期已存在请假记录',
+              showCancel: false
+            });
+          }
         }
       }
     });
@@ -133,7 +164,7 @@ const LeaveRequestPage: React.FC = () => {
           1. 请提前至少2小时提交请假申请
         </Text>
         <Text className={styles.tipsContent}>
-          2. 请假申请提交后，学校会尽快审核
+          2. 同一天不能重复请假
         </Text>
         <Text className={styles.tipsContent}>
           3. 如有紧急情况，请直接联系班主任

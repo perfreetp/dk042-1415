@@ -1,13 +1,93 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView } from '@tarojs/components';
+import { View, Text, ScrollView, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
-import { stationListData } from '@/data/mock';
+import { useAppStore } from '@/store';
 import type { StationInfo } from '@/types';
 import styles from './index.module.scss';
 
 const StationManagePage: React.FC = () => {
-  const [stations, setStations] = useState<StationInfo[]>(stationListData);
+  const { stations, addStation, updateStation, deleteStation, setDefaultStation } = useAppStore();
+  const [showModal, setShowModal] = useState(false);
+  const [editingStation, setEditingStation] = useState<StationInfo | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    address: '',
+    type: 'board' as 'board' | 'alight' | 'both'
+  });
+
+  const openAddModal = () => {
+    setEditingStation(null);
+    setFormData({ name: '', address: '', type: 'board' });
+    setShowModal(true);
+  };
+
+  const openEditModal = (station: StationInfo) => {
+    setEditingStation(station);
+    setFormData({
+      name: station.name,
+      address: station.address,
+      type: station.type
+    });
+    setShowModal(true);
+  };
+
+  const handleSubmit = () => {
+    if (!formData.name.trim()) {
+      Taro.showToast({ title: '请输入站点名称', icon: 'none' });
+      return;
+    }
+    if (!formData.address.trim()) {
+      Taro.showToast({ title: '请输入站点地址', icon: 'none' });
+      return;
+    }
+
+    if (editingStation) {
+      updateStation({
+        ...editingStation,
+        name: formData.name,
+        address: formData.address,
+        type: formData.type
+      });
+      Taro.showToast({ title: '修改成功', icon: 'success' });
+    } else {
+      const newStation: StationInfo = {
+        id: `st-${Date.now()}`,
+        name: formData.name,
+        address: formData.address,
+        type: formData.type,
+        isDefault: stations.length === 0
+      };
+      addStation(newStation);
+      Taro.showToast({ title: '添加成功', icon: 'success' });
+    }
+    setShowModal(false);
+  };
+
+  const handleSetDefault = (id: string) => {
+    setDefaultStation(id);
+    Taro.showToast({ title: '设置成功', icon: 'success' });
+    console.log('[StationManage] 设置默认站点，ID:', id);
+  };
+
+  const handleDelete = (id: string) => {
+    const station = stations.find((s) => s.id === id);
+    if (station?.isDefault) {
+      Taro.showToast({ title: '默认站点不能删除', icon: 'none' });
+      return;
+    }
+
+    Taro.showModal({
+      title: '删除站点',
+      content: '确认删除该站点吗？',
+      success: (res) => {
+        if (res.confirm) {
+          deleteStation(id);
+          Taro.showToast({ title: '删除成功', icon: 'success' });
+        }
+      }
+    });
+  };
 
   const getTypeTagText = (type: StationInfo['type']) => {
     switch (type) {
@@ -31,39 +111,6 @@ const StationManagePage: React.FC = () => {
       default:
         return '';
     }
-  };
-
-  const handleSetDefault = (id: string) => {
-    setStations((prev) =>
-      prev.map((s) => ({
-        ...s,
-        isDefault: s.id === id ? true : s.isDefault
-      }))
-    );
-    Taro.showToast({ title: '设置成功', icon: 'success' });
-    console.log('[StationManage] 设置默认站点，ID:', id);
-  };
-
-  const handleEdit = (station: StationInfo) => {
-    Taro.showToast({ title: '编辑功能开发中', icon: 'none' });
-  };
-
-  const handleDelete = (id: string) => {
-    Taro.showModal({
-      title: '删除站点',
-      content: '确认删除该站点吗？',
-      success: (res) => {
-        if (res.confirm) {
-          setStations((prev) => prev.filter((s) => s.id !== id));
-          Taro.showToast({ title: '删除成功', icon: 'success' });
-          console.log('[StationManage] 删除站点，ID:', id);
-        }
-      }
-    });
-  };
-
-  const handleAdd = () => {
-    Taro.showToast({ title: '添加功能开发中', icon: 'none' });
   };
 
   const boardStations = stations.filter((s) => s.type !== 'alight');
@@ -96,7 +143,7 @@ const StationManagePage: React.FC = () => {
               <Text>设为默认</Text>
             </View>
           )}
-          <View className={styles.actionBtn} onClick={() => handleEdit(station)}>
+          <View className={styles.actionBtn} onClick={() => openEditModal(station)}>
             <Text>编辑</Text>
           </View>
           <View className={styles.actionBtn} onClick={() => handleDelete(station.id)}>
@@ -136,12 +183,168 @@ const StationManagePage: React.FC = () => {
       </ScrollView>
 
       <View className={styles.addBtn}>
-        <View className={styles.addBtnInner} onClick={handleAdd}>
+        <View className={styles.addBtnInner} onClick={openAddModal}>
           <Text>+ 添加站点</Text>
         </View>
       </View>
+
+      {showModal && (
+        <View className={modalStyles.modalMask}>
+          <View className={modalStyles.modalContent}>
+            <Text className={modalStyles.modalTitle}>
+              {editingStation ? '编辑站点' : '添加站点'}
+            </Text>
+
+            <View className={modalStyles.formItem}>
+              <Text className={modalStyles.formLabel}>站点名称</Text>
+              <Input
+                className={modalStyles.formInput}
+                placeholder="请输入站点名称"
+                value={formData.name}
+                onInput={(e) => setFormData({ ...formData, name: e.detail.value })}
+                maxlength={20}
+              />
+            </View>
+
+            <View className={modalStyles.formItem}>
+              <Text className={modalStyles.formLabel}>站点地址</Text>
+              <Input
+                className={modalStyles.formInput}
+                placeholder="请输入站点地址"
+                value={formData.address}
+                onInput={(e) => setFormData({ ...formData, address: e.detail.value })}
+                maxlength={50}
+              />
+            </View>
+
+            <View className={modalStyles.formItem}>
+              <Text className={modalStyles.formLabel}>站点类型</Text>
+              <View className={modalStyles.typeOptions}>
+                {[
+                  { key: 'board', label: '上车点' },
+                  { key: 'alight', label: '下车点' },
+                  { key: 'both', label: '上下车点' }
+                ].map((opt) => (
+                  <View
+                    key={opt.key}
+                    className={classnames(
+                      modalStyles.typeOption,
+                      formData.type === opt.key && modalStyles.typeOptionActive
+                    )}
+                    onClick={() => setFormData({ ...formData, type: opt.key as any })}
+                  >
+                    <Text className={modalStyles.typeOptionText}>{opt.label}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <View className={modalStyles.modalActions}>
+              <View
+                className={classnames(modalStyles.modalBtn, modalStyles.modalBtnCancel)}
+                onClick={() => setShowModal(false)}
+              >
+                <Text>取消</Text>
+              </View>
+              <View
+                className={classnames(modalStyles.modalBtn, modalStyles.modalBtnConfirm)}
+                onClick={handleSubmit}
+              >
+                <Text>确定</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
+};
+
+const modalStyles = {
+  modalMask: {
+    position: 'fixed' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 999
+  },
+  modalContent: {
+    width: '600rpx',
+    backgroundColor: '#fff',
+    borderRadius: '24rpx',
+    padding: '40rpx',
+    boxSizing: 'border-box' as const
+  },
+  modalTitle: {
+    fontSize: '36rpx',
+    fontWeight: 600,
+    color: '#1d2129',
+    textAlign: 'center' as const,
+    marginBottom: '40rpx'
+  },
+  formItem: {
+    marginBottom: '32rpx'
+  },
+  formLabel: {
+    fontSize: '28rpx',
+    color: '#4e5969',
+    marginBottom: '16rpx',
+    display: 'block'
+  },
+  formInput: {
+    width: '100%',
+    height: '80rpx',
+    backgroundColor: '#f5f6f7',
+    borderRadius: '12rpx',
+    padding: '0 24rpx',
+    fontSize: '28rpx',
+    boxSizing: 'border-box' as const
+  },
+  typeOptions: {
+    display: 'flex' as const,
+    gap: '16rpx'
+  },
+  typeOption: {
+    flex: 1,
+    height: '72rpx',
+    borderRadius: '12rpx',
+    border: '2rpx solid #e5e6eb',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  typeOptionActive: {
+    backgroundColor: 'rgba(46, 125, 255, 0.1)',
+    borderColor: '#2E7DFF'
+  },
+  typeOptionText: {
+    fontSize: '26rpx',
+    color: '#4e5969'
+  },
+  modalActions: {
+    display: 'flex' as const,
+    gap: '24rpx',
+    marginTop: '40rpx'
+  },
+  modalBtn: {
+    flex: 1,
+    height: '88rpx',
+    borderRadius: '48rpx',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  modalBtnCancel: {
+    backgroundColor: '#f2f3f5'
+  },
+  modalBtnConfirm: {
+    backgroundColor: '#2E7DFF'
+  }
 };
 
 export default StationManagePage;

@@ -1,12 +1,24 @@
 import React from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import SettingItem from '@/components/SettingItem';
 import StatusTag from '@/components/StatusTag';
-import { stationListData, contactListData, leaveRecordList } from '@/data/mock';
+import { useAppStore } from '@/store';
 import styles from './index.module.scss';
 
 const SettingsPage: React.FC = () => {
+  const {
+    stations,
+    contacts,
+    leaveRecords,
+    getDefaultBoardStation,
+    getDefaultAlightStation
+  } = useAppStore();
+
+  useDidShow(() => {
+    console.log('[Settings] 页面展示，刷新数据');
+  });
+
   const handleLeaveRequest = () => {
     Taro.navigateTo({ url: '/pages/leave-request/index' });
   };
@@ -19,6 +31,10 @@ const SettingsPage: React.FC = () => {
     Taro.navigateTo({ url: '/pages/contact-manage/index' });
   };
 
+  const handleMessageList = () => {
+    Taro.navigateTo({ url: '/pages/messages/index' });
+  };
+
   const handleContactSchool = () => {
     Taro.showModal({
       title: '联系学校',
@@ -28,8 +44,9 @@ const SettingsPage: React.FC = () => {
     });
   };
 
-  const defaultBoardStation = stationListData.find((s) => s.type !== 'alight' && s.isDefault);
-  const defaultAlightStation = stationListData.find((s) => s.type !== 'board' && s.isDefault);
+  const defaultBoardStation = getDefaultBoardStation();
+  const defaultAlightStation = getDefaultAlightStation();
+  const primaryContact = contacts.find((c) => c.isPrimary);
 
   return (
     <ScrollView className={styles.pageContainer} scrollY>
@@ -40,10 +57,10 @@ const SettingsPage: React.FC = () => {
             <Text className={styles.actionTitle}>申请请假</Text>
             <Text className={styles.actionDesc}>临时不坐车，提前告知</Text>
           </View>
-          <View className={styles.quickActionCard} onClick={handleContactSchool}>
-            <Text className={styles.actionIcon}>📞</Text>
-            <Text className={styles.actionTitle}>联系学校</Text>
-            <Text className={styles.actionDesc}>有疑问随时沟通</Text>
+          <View className={styles.quickActionCard} onClick={handleMessageList}>
+            <Text className={styles.actionIcon}>�</Text>
+            <Text className={styles.actionTitle}>消息记录</Text>
+            <Text className={styles.actionDesc}>查看所有通知消息</Text>
           </View>
         </View>
       </View>
@@ -76,13 +93,12 @@ const SettingsPage: React.FC = () => {
         <SettingItem
           icon="👥"
           title="紧急联系人"
-          desc="设置可联系的紧急联系人"
+          desc={primaryContact ? `首要联系人：${primaryContact.name}` : '设置可联系的紧急联系人'}
           type="navigate"
-          isLast={false}
           onClick={handleContactManage}
         />
         <View className={styles.contactsPreview}>
-          {contactListData.slice(0, 2).map((contact) => (
+          {contacts.slice(0, 2).map((contact) => (
             <View key={contact.id} className={styles.contactItem}>
               <View className={styles.contactAvatar}>
                 <Text className={styles.contactAvatarText}>
@@ -108,21 +124,27 @@ const SettingsPage: React.FC = () => {
 
       <Text className={styles.sectionTitle}>请假记录</Text>
       <View className={styles.leaveRecords}>
-        {leaveRecordList.map((record) => (
-          <View key={record.id} className={styles.leaveRecordItem}>
-            <View className={styles.leaveRecordInfo}>
-              <Text className={styles.leaveRecordDate}>{record.date}</Text>
-              <Text className={styles.leaveRecordReason}>{record.reason}</Text>
+        {leaveRecords.length > 0 ? (
+          leaveRecords.map((record) => (
+            <View key={record.id} className={styles.leaveRecordItem}>
+              <View className={styles.leaveRecordInfo}>
+                <Text className={styles.leaveRecordDate}>{record.date}</Text>
+                <Text className={styles.leaveRecordReason}>{record.reason}</Text>
+              </View>
+              <View className={styles.leaveRecordStatus}>
+                <StatusTag
+                  type={record.status === 'approved' ? 'success' : record.status === 'rejected' ? 'error' : 'warning'}
+                  text={record.status === 'approved' ? '已批准' : record.status === 'rejected' ? '已拒绝' : '待审批'}
+                  size="sm"
+                />
+              </View>
             </View>
-            <View className={styles.leaveRecordStatus}>
-              <StatusTag
-                type={record.status === 'approved' ? 'success' : record.status === 'rejected' ? 'error' : 'warning'}
-                text={record.status === 'approved' ? '已批准' : record.status === 'rejected' ? '已拒绝' : '待审批'}
-                size="sm"
-              />
-            </View>
+          ))
+        ) : (
+          <View style={{ textAlign: 'center', padding: '40rpx', color: '#86909C' }}>
+            <Text>暂无请假记录</Text>
           </View>
-        ))}
+        )}
       </View>
     </ScrollView>
   );

@@ -2,6 +2,7 @@ export default defineAppConfig({
   pages: [
     'pages/ride-today/index',
     'pages/exception/index',
+    'pages/messages/index',
     'pages/settings/index',
     'pages/exception-detail/index',
     'pages/leave-request/index',
@@ -28,6 +29,10 @@ export default defineAppConfig({
       {
         pagePath: 'pages/exception/index',
         text: '异常确认'
+      },
+      {
+        pagePath: 'pages/messages/index',
+        text: '消息记录'
       },
       {
         pagePath: 'pages/settings/index',

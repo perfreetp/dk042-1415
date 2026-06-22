@@ -1,26 +1,32 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
+import Taro, { useDidShow } from '@tarojs/taro';
 import classnames from 'classnames';
 import ExceptionCard from '@/components/ExceptionCard';
-import { exceptionListData } from '@/data/mock';
+import { useAppStore } from '@/store';
 import type { ExceptionRecord, ExceptionStatus } from '@/types';
 import styles from './index.module.scss';
 
 type FilterType = 'all' | ExceptionStatus;
 
 const ExceptionPage: React.FC = () => {
+  const { exceptions } = useAppStore();
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
 
-  const filteredList = exceptionListData.filter((item) => {
+  useDidShow(() => {
+    console.log('[Exception] 页面展示，刷新异常列表');
+  });
+
+  const filteredList = exceptions.filter((item) => {
     if (activeFilter === 'all') return true;
     return item.status === activeFilter;
   });
 
-  const pendingCount = exceptionListData.filter((item) => item.status === 'pending').length;
-  const acknowledgedCount = exceptionListData.filter(
+  const pendingCount = exceptions.filter((item) => item.status === 'pending').length;
+  const acknowledgedCount = exceptions.filter(
     (item) => item.status === 'acknowledged'
   ).length;
-  const questionedCount = exceptionListData.filter((item) => item.status === 'questioned').length;
+  const questionedCount = exceptions.filter((item) => item.status === 'questioned').length;
 
   const filters: { key: FilterType; label: string }[] = [
     { key: 'all', label: '全部' },
@@ -34,9 +40,7 @@ const ExceptionPage: React.FC = () => {
       <View className={styles.headerSection}>
         <View className={styles.summaryCard}>
           <View className={styles.summaryItem}>
-            <Text className={classnames(styles.summaryNumber, styles.warning)}>
-              {pendingCount}
-            </Text>
+            <Text className={classnames(styles.summaryNumber, styles.warning)}>{pendingCount}</Text>
             <Text className={styles.summaryLabel}>待确认</Text>
           </View>
           <View className={styles.summaryDivider} />
