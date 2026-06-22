@@ -1,0 +1,222 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: $spacing-xl;
+}
+
+.headerSection {
+  padding: $spacing-lg $page-padding;
+  background: linear-gradient(180deg, rgba(46, 125, 255, 0.1) 0%, transparent 100%);
+}
+
+.quickActions {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.quickActionCard {
+  flex: 1;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.97);
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  }
+
+  &.primaryAction {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    box-shadow: 0 4rpx 16rpx rgba(46, 125, 255, 0.25);
+  }
+}
+
+.actionIcon {
+  font-size: 56rpx;
+  margin-bottom: $spacing-sm;
+}
+
+.actionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+
+  .primaryAction & {
+    color: $color-text-white;
+  }
+}
+
+.actionDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+
+  .primaryAction & {
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin: $spacing-lg $page-padding $spacing-md;
+}
+
+.settingsGroup {
+  margin: 0 $page-padding $spacing-lg;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+}
+
+.stationsPreview {
+  padding: $spacing-md $spacing-lg;
+  background-color: $color-bg-section;
+  margin-top: -1rpx;
+}
+
+.stationItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-sm 0;
+
+  &:not(:last-child) {
+    border-bottom: 1rpx solid $color-divider;
+  }
+}
+
+.stationLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  width: 100rpx;
+  flex-shrink: 0;
+}
+
+.stationName {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  flex: 1;
+  @include text-ellipsis;
+}
+
+.contactsPreview {
+  padding: $spacing-md $spacing-lg;
+  background-color: $color-bg-section;
+  margin-top: -1rpx;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-sm 0;
+
+  &:not(:last-child) {
+    border-bottom: 1rpx solid $color-divider;
+  }
+}
+
+.contactAvatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-round;
+  background-color: $color-primary-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.contactAvatarText {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.contactInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.contactName {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  display: block;
+  margin-bottom: 2rpx;
+}
+
+.contactRelation {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.contactPhone {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+  margin-left: $spacing-sm;
+}
+
+.primaryBadge {
+  display: inline-block;
+  padding: 2rpx 8rpx;
+  background-color: $color-primary-bg;
+  border-radius: $radius-xs;
+  margin-left: $spacing-xs;
+  vertical-align: middle;
+
+  text {
+    font-size: 20rpx;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.leaveRecords {
+  margin: 0 $page-padding;
+}
+
+.leaveRecordItem {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md $spacing-lg;
+  margin-bottom: $spacing-sm;
+  box-shadow: $shadow-card;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.leaveRecordInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.leaveRecordDate {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.leaveRecordReason {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  @include text-ellipsis;
+}
+
+.leaveRecordStatus {
+  flex-shrink: 0;
+  margin-left: $spacing-md;
+}

@@ -1,0 +1,133 @@
+@use '@/styles/variables.scss' as *;
+
+.timelineCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.cardHeader {
+  margin-bottom: $spacing-md;
+}
+
+.cardTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.timelineContainer {
+  position: relative;
+}
+
+.timelineItem {
+  display: flex;
+  padding-bottom: $spacing-lg;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.timelineLeft {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 64rpx;
+  flex-shrink: 0;
+}
+
+.nodeDot {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $color-bg-hover;
+  z-index: 1;
+  flex-shrink: 0;
+
+  &.dotDone {
+    background-color: $color-success-bg;
+  }
+
+  &.dotPending {
+    background-color: $color-bg-hover;
+  }
+
+  &.dotMissed {
+    background-color: $color-warning-bg;
+  }
+}
+
+.nodeIcon {
+  font-size: 28rpx;
+}
+
+.timelineLine {
+  flex: 1;
+  width: 4rpx;
+  margin-top: $spacing-xs;
+  background-color: $color-divider;
+  min-height: 32rpx;
+
+  &.lineDone {
+    background-color: $color-success;
+  }
+}
+
+.timelineContent {
+  flex: 1;
+  padding-left: $spacing-sm;
+  padding-top: 4rpx;
+}
+
+.nodeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-xs;
+}
+
+.nodeTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+
+  &.titlePending {
+    color: $color-text-tertiary;
+  }
+}
+
+.nodeTime {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+}
+
+.nodeStation {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.lineBadge {
+  display: inline-block;
+  padding: 4rpx 12rpx;
+  background-color: $color-primary-bg;
+  border-radius: $radius-xs;
+  margin-bottom: $spacing-xs;
+}
+
+.lineBadgeText {
+  font-size: $font-size-xs;
+  color: $color-primary;
+}
+
+.nodeDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}

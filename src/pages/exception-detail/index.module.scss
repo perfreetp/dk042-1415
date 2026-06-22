@@ -1,0 +1,197 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: 200rpx;
+}
+
+.exceptionHeader {
+  background: linear-gradient(135deg, $color-warning 0%, #FFA940 100%);
+  padding: $spacing-xl $page-padding;
+  color: $color-text-white;
+}
+
+.exceptionTypeIcon {
+  font-size: 80rpx;
+  margin-bottom: $spacing-md;
+}
+
+.exceptionTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  margin-bottom: $spacing-xs;
+  display: block;
+}
+
+.exceptionTime {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.statusBanner {
+  margin: -$spacing-lg $page-padding $spacing-lg;
+  padding: $spacing-md $spacing-lg;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+.statusLabel {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.sectionCard {
+  margin: 0 $page-padding $spacing-lg;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.detailItem {
+  display: flex;
+  padding: $spacing-sm 0;
+
+  &:not(:last-child) {
+    border-bottom: 1rpx solid $color-divider;
+    margin-bottom: $spacing-sm;
+    padding-bottom: $spacing-md;
+  }
+}
+
+.detailLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  width: 160rpx;
+  flex-shrink: 0;
+}
+
+.detailValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  flex: 1;
+  line-height: 1.6;
+}
+
+.confirmerSection {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md;
+  background-color: $color-primary-bg;
+  border-radius: $radius-md;
+}
+
+.confirmerAvatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-round;
+  background-color: $color-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.confirmerAvatarText {
+  font-size: $font-size-lg;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}
+
+.confirmerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.confirmerName {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.confirmerRole {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.reasonBox {
+  padding: $spacing-md $spacing-lg;
+  background-color: $color-bg-section;
+  border-radius: $radius-md;
+  margin-top: $spacing-sm;
+}
+
+.reasonText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.7;
+}
+
+.bottomActions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  background-color: $color-bg-card;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: $spacing-md;
+}
+
+.actionBtn {
+  flex: 1;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @include button-reset;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+
+  &.btnPrimary {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+
+    text {
+      color: $color-text-white;
+      font-size: $font-size-md;
+      font-weight: $font-weight-semibold;
+    }
+  }
+
+  &.btnSecondary {
+    background-color: $color-bg-section;
+    border: 2rpx solid $color-border;
+
+    text {
+      color: $color-text-secondary;
+      font-size: $font-size-md;
+      font-weight: $font-weight-medium;
+    }
+  }
+}

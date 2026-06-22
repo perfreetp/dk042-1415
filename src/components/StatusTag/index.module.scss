@@ -1,0 +1,71 @@
+@use '@/styles/variables.scss' as *;
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  white-space: nowrap;
+
+  &.sizeSm {
+    padding: 4rpx 12rpx;
+  }
+
+  &.sizeMd {
+    padding: 8rpx 16rpx;
+  }
+}
+
+.tagText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  line-height: 1.2;
+}
+
+.tagSuccess {
+  background-color: $color-success-bg;
+
+  .tagText {
+    color: $color-success;
+  }
+}
+
+.tagWarning {
+  background-color: $color-warning-bg;
+
+  .tagText {
+    color: $color-warning;
+  }
+}
+
+.tagError {
+  background-color: $color-error-bg;
+
+  .tagText {
+    color: $color-error;
+  }
+}
+
+.tagInfo {
+  background-color: $color-primary-bg;
+
+  .tagText {
+    color: $color-primary;
+  }
+}
+
+.tagPending {
+  background-color: $color-bg-hover;
+
+  .tagText {
+    color: $color-text-tertiary;
+  }
+}
+
+.tagDefault {
+  background-color: $color-bg-hover;
+
+  .tagText {
+    color: $color-text-secondary;
+  }
+}
