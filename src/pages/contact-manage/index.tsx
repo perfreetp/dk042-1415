@@ -41,11 +41,14 @@ const ContactManagePage: React.FC = () => {
       Taro.showToast({ title: '请输入关系', icon: 'none' });
       return;
     }
-    if (!/^1\d{10}$/.test(formData.phone.replace(/\*/g, '0')) {
-      if (formData.phone.length < 7) {
-        Taro.showToast({ title: '请输入正确的手机号', icon: 'none' });
-        return;
-      }
+    const phone = formData.phone.trim();
+    if (!phone) {
+      Taro.showToast({ title: '请输入手机号', icon: 'none' });
+      return;
+    }
+    if (phone.length < 7) {
+      Taro.showToast({ title: '手机号太短，请重新输入', icon: 'none' });
+      return;
     }
 
     if (editingContact) {
@@ -53,7 +56,7 @@ const ContactManagePage: React.FC = () => {
         ...editingContact,
         name: formData.name,
         relation: formData.relation,
-        phone: formData.phone
+        phone: phone
       });
       Taro.showToast({ title: '修改成功', icon: 'success' });
     } else {
@@ -61,7 +64,7 @@ const ContactManagePage: React.FC = () => {
         id: `c-${Date.now()}`,
         name: formData.name,
         relation: formData.relation,
-        phone: formData.phone,
+        phone: phone,
         isPrimary: contacts.length === 0
       };
       addContact(newContact);

@@ -58,7 +58,7 @@ const SettingsPage: React.FC = () => {
             <Text className={styles.actionDesc}>临时不坐车，提前告知</Text>
           </View>
           <View className={styles.quickActionCard} onClick={handleMessageList}>
-            <Text className={styles.actionIcon}>�</Text>
+            <Text className={styles.actionIcon}>💬</Text>
             <Text className={styles.actionTitle}>消息记录</Text>
             <Text className={styles.actionDesc}>查看所有通知消息</Text>
           </View>
@@ -98,7 +98,7 @@ const SettingsPage: React.FC = () => {
           onClick={handleContactManage}
         />
         <View className={styles.contactsPreview}>
-          {contacts.slice(0, 2).map((contact) => (
+          {contacts.map((contact) => (
             <View key={contact.id} className={styles.contactItem}>
               <View className={styles.contactAvatar}>
                 <Text className={styles.contactAvatarText}>
