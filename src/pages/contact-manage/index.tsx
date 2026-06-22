@@ -175,16 +175,16 @@ const ContactManagePage: React.FC = () => {
       </View>
 
       {showModal && (
-        <View className={modalStyles.modalMask}>
-          <View className={modalStyles.modalContent}>
-            <Text className={modalStyles.modalTitle}>
+        <View className={styles.modalMask}>
+          <View className={styles.modalContent}>
+            <Text className={styles.modalTitle}>
               {editingContact ? '编辑联系人' : '添加联系人'}
             </Text>
 
-            <View className={modalStyles.formItem}>
-              <Text className={modalStyles.formLabel}>姓名</Text>
+            <View className={styles.modalFormItem}>
+              <Text className={styles.modalFormLabel}>姓名</Text>
               <Input
-                className={modalStyles.formInput}
+                className={styles.modalFormInput}
                 placeholder="请输入姓名"
                 value={formData.name}
                 onInput={(e) => setFormData({ ...formData, name: e.detail.value })}
@@ -192,10 +192,10 @@ const ContactManagePage: React.FC = () => {
               />
             </View>
 
-            <View className={modalStyles.formItem}>
-              <Text className={modalStyles.formLabel}>关系</Text>
+            <View className={styles.modalFormItem}>
+              <Text className={styles.modalFormLabel}>关系</Text>
               <Input
-                className={modalStyles.formInput}
+                className={styles.modalFormInput}
                 placeholder="如：父亲、母亲、爷爷"
                 value={formData.relation}
                 onInput={(e) => setFormData({ ...formData, relation: e.detail.value })}
@@ -203,10 +203,10 @@ const ContactManagePage: React.FC = () => {
               />
             </View>
 
-            <View className={modalStyles.formItem}>
-              <Text className={modalStyles.formLabel}>手机号</Text>
+            <View className={styles.modalFormItem}>
+              <Text className={styles.modalFormLabel}>手机号</Text>
               <Input
-                className={modalStyles.formInput}
+                className={styles.modalFormInput}
                 type="number"
                 placeholder="请输入手机号"
                 value={formData.phone}
@@ -215,15 +215,15 @@ const ContactManagePage: React.FC = () => {
               />
             </View>
 
-            <View className={modalStyles.modalActions}>
+            <View className={styles.modalActions}>
               <View
-                className={classnames(modalStyles.modalBtn, modalStyles.modalBtnCancel)}
+                className={classnames(styles.modalBtn, styles.modalBtnCancel)}
                 onClick={() => setShowModal(false)}
               >
                 <Text>取消</Text>
               </View>
               <View
-                className={classnames(modalStyles.modalBtn, modalStyles.modalBtnConfirm)}
+                className={classnames(styles.modalBtn, styles.modalBtnConfirm)}
                 onClick={handleSubmit}
               >
                 <Text>确定</Text>
@@ -234,72 +234,6 @@ const ContactManagePage: React.FC = () => {
       )}
     </View>
   );
-};
-
-const modalStyles = {
-  modalMask: {
-    position: 'fixed' as const,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 999
-  },
-  modalContent: {
-    width: '600rpx',
-    backgroundColor: '#fff',
-    borderRadius: '24rpx',
-    padding: '40rpx',
-    boxSizing: 'border-box' as const
-  },
-  modalTitle: {
-    fontSize: '36rpx',
-    fontWeight: 600,
-    color: '#1d2129',
-    textAlign: 'center' as const,
-    marginBottom: '40rpx'
-  },
-  formItem: {
-    marginBottom: '32rpx'
-  },
-  formLabel: {
-    fontSize: '28rpx',
-    color: '#4e5969',
-    marginBottom: '16rpx',
-    display: 'block'
-  },
-  formInput: {
-    width: '100%',
-    height: '80rpx',
-    backgroundColor: '#f5f6f7',
-    borderRadius: '12rpx',
-    padding: '0 24rpx',
-    fontSize: '28rpx',
-    boxSizing: 'border-box' as const
-  },
-  modalActions: {
-    display: 'flex' as const,
-    gap: '24rpx',
-    marginTop: '40rpx'
-  },
-  modalBtn: {
-    flex: 1,
-    height: '88rpx',
-    borderRadius: '48rpx',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  modalBtnCancel: {
-    backgroundColor: '#f2f3f5'
-  },
-  modalBtnConfirm: {
-    backgroundColor: '#2E7DFF'
-  }
 };
 
 export default ContactManagePage;
